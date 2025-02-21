@@ -4,8 +4,8 @@
 
 在开始之前，请确保已具备以下条件：
 
-*  一台运行红帽系 Linux 的服务器（包括并不限于 RHEL, AlmaLinux, Rocky Linux）
-*  一个域名，并将其 DNS 解析到服务器 IP 地址
+*  **一台运行红帽系 Linux 的服务器**（包括但不限于 RHEL, AlmaLinux, Rocky Linux）
+*  **一个域名，并将其 DNS 解析到服务器 IP 地址**
 
 ## 为什么选择 AlmaLinux
 
@@ -18,9 +18,7 @@ AlmaLinux 是一个基于 RHEL (Red Hat Enterprise Linux) 的免费开源发行�
 
 ## 部署步骤
 
-### 1. 配置 DNS 将域名指向 VPS 的 IP 地址
-
-### 2. 关闭 SSH 的密码登录（可选）
+### 1. 关闭 SSH 的密码登录（可选）
 
 为了提高服务器安全性，建议关闭 SSH 密码登录，并使用密钥登录。**关闭密码登录前请务必确认密钥已经正确配置**
 
@@ -41,17 +39,18 @@ KbdInteractiveAuthentication no
 sudo systemctl reload-or-restart sshd.service
 ```
 
-### 3. 升级系统并安装必要软件
+### 2. 升级系统并安装必要软件
+
 ```shell
 sudo dnf -y upgrade
 sudo dnf -y install curl nano firewalld
 sudo systemctl start firewalld.service
 ```
 
-### 4. 配置防火墙
+### 3. 配置防火墙
+
 ```shell
-sudo firewall-cmd --permanent --add-service=https
-sudo firewall-cmd --permanent --add-port=443/udp
+sudo firewall-cmd --permanent --add-service=http3
 sudo firewall-cmd --reload
 ```
 
@@ -61,12 +60,14 @@ sudo firewall-cmd --reload
 sudo firewall-cmd --list-all
 ```
 
-### 5. 安装 Hysteria 2
+### 4. 安装 Hysteria 2
+
 ```shell
 sudo bash -c "$(curl -fsSL https://get.hy2.sh/)"
 ```
 
-### 6. 修改配置文件
+### 5. 修改配置文件
+
 ```shell
 sudo nano /etc/hysteria/config.yaml
 ```
@@ -92,7 +93,49 @@ masquerade:
     rewriteHost: true
 ```
 
-### 7. 启动服务
+### 6. 启动服务
+
 ```shell
 sudo systemctl enable --now hysteria-server.service
+```
+
+## HTTP/HTTPS 伪装
+
+修改 `masquerade` 部分的配置为：
+
+```yaml
+masquerade:
+  type: proxy
+  proxy:
+    url: https://almalinux.org/ # 可修改为伪装目标网站
+    rewriteHost: true
+  listenHTTP: :80
+  listenHTTPS: :443
+  forceHTTPS: true
+```
+
+重启服务并且添加相应防火墙规则：
+
+```shell
+sudo systemctl restart hysteria-server.service
+sudo firewall-cmd --permanent --add-service={http,https}
+sudo firewall-cmd --reload
+```
+
+## 客户端配置
+
+```yaml
+server: www.domain.com:443 # 修改为你的域名
+
+auth: hunter2 # 修改为你的密码
+
+bandwidth:
+  up: 100 mbps # 修改为本地最大上传速率
+  down: 100 mbps # 修改为本地最大下载速率
+
+socks5:
+  listen: 127.0.0.1:1080 # 根据需求修改端口
+
+http:
+  listen: 127.0.0.1:8080 # 根据需求修改端口
 ```
