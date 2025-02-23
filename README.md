@@ -18,7 +18,15 @@ AlmaLinux 是一个基于 RHEL (Red Hat Enterprise Linux) 的免费开源发行�
 
 ## 部署步骤
 
-### 1. 关闭 SSH 的密码登录（可选）
+### 1. 升级系统并安装必要软件
+
+```shell
+sudo dnf -y upgrade
+sudo dnf -y install curl nano firewalld
+sudo systemctl start firewalld.service
+```
+
+### 2. 关闭 SSH 的密码登录（可选）
 
 为了提高服务器安全性，建议关闭 SSH 密码登录，并使用密钥登录。**关闭密码登录前请务必确认密钥已经正确配置**
 
@@ -37,14 +45,6 @@ KbdInteractiveAuthentication no
 
 ```shell
 sudo systemctl reload-or-restart sshd.service
-```
-
-### 2. 升级系统并安装必要软件
-
-```shell
-sudo dnf -y upgrade
-sudo dnf -y install curl nano firewalld
-sudo systemctl start firewalld.service
 ```
 
 ### 3. 配置防火墙
@@ -89,7 +89,7 @@ auth:
 masquerade:
   type: proxy
   proxy:
-    url: https://almalinux.org/
+    url: https://almalinux.org/ # 自定义伪装目标网站
     rewriteHost: true
 ```
 
@@ -99,7 +99,7 @@ masquerade:
 sudo systemctl enable --now hysteria-server.service
 ```
 
-## HTTP/HTTPS 伪装
+### 7. HTTP/HTTPS 伪装（可选）
 
 修改 `masquerade` 部分的配置为：
 
@@ -107,7 +107,7 @@ sudo systemctl enable --now hysteria-server.service
 masquerade:
   type: proxy
   proxy:
-    url: https://almalinux.org/ # 可修改为伪装目标网站
+    url: https://almalinux.org/
     rewriteHost: true
   listenHTTP: :80
   listenHTTPS: :443
