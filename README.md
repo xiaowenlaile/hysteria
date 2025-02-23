@@ -101,9 +101,28 @@ sudo systemctl enable --now hysteria-server.service
 
 ### 7. HTTP/HTTPS 伪装（可选）
 
-修改 `masquerade` 部分的配置为：
+添加下列三行配置到 `masquerade` 部分，添加时请注意空格
 
 ```yaml
+  listenHTTP: :80
+  listenHTTPS: :443
+  forceHTTPS: true
+```
+
+最终配置示例：
+
+```yaml
+listen: :443
+
+acme:
+  domains:
+    - www.domain.com
+  email: xxx@gmail.com
+
+auth:
+  type: password
+  password: hunter2
+
 masquerade:
   type: proxy
   proxy:
