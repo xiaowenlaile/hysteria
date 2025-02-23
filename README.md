@@ -72,7 +72,7 @@ sudo bash -c "$(curl -fsSL https://get.hy2.sh/)"
 sudo nano /etc/hysteria/config.yaml
 ```
 
-将以下内容复制到 `config.yaml` 文件中，并根据实际情况进行修改：
+根据实际情况修改 `config.yaml` 文件：
 
 ```yaml
 listen: :443
@@ -114,10 +114,15 @@ masquerade:
   forceHTTPS: true
 ```
 
-重启服务并且添加相应防火墙规则：
+重启服务：
 
 ```shell
 sudo systemctl restart hysteria-server.service
+```
+
+添加相应防火墙规则：
+
+```shell
 sudo firewall-cmd --permanent --add-service={http,https}
 sudo firewall-cmd --reload
 ```
